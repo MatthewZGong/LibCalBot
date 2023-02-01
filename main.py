@@ -55,14 +55,16 @@ def selectRoom(driver: webdriver,wait_driver:WebDriverWait, time:str, day: str, 
     #selecting time slot based on time
 
     #check if day is today 
+    today_day = None 
+    
+    Go_To_Date_Btn = wait_driver.until(EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Go To Date']")))
+    Go_To_Date_Btn.click()
+    today_dt = datetime.datetime.combine(datetime.date.today(), datetime.time(second=0, hour = 0, minute=0))
+    # today_unix = str(int(today_dt.timestamp() * 1000))
+    today_day = today_dt.day
+    print("today: ", today_day)
     try:
-        Go_To_Date_Btn = wait_driver.until(EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Go To Date']")))
-        Go_To_Date_Btn.click()
-        today_dt = datetime.datetime.combine(datetime.date.today(), datetime.time(second=0, hour = 0, minute=0 ,tzinfo=datetime.timezone.utc))
-        today_unix = str(int(today_dt.timestamp() * 1000))
-        today_day = wait_driver.until(EC.presence_of_element_located((By.XPATH,"//td[contains(@class,'today disabled day')  and contains(@data-date,'{}')]".format(today_unix))))
-        print("today: ",today_day.text)
-        if(day != today_day.text):
+        if(day != today_day):
             random_object =  wait_driver.until(EC.element_to_be_clickable((By.XPATH, "//th[@class='dow']")))
             random_object.click() #there is a problem when the go to date btn is selected it a pop up appears where it blocks some of the days this is to deselect the btn so the pop up disappears
             change_date_day_btn = wait_driver.until(EC.element_to_be_clickable((By.XPATH, CHANGE_DATE_DAY_XPATH.format(day = day))))
