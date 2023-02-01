@@ -152,14 +152,14 @@ def reserveRoom(driver: webdriver, wait_driver:WebDriverWait, day = None, time =
         return False 
     return True
 
-def reserve_time_range_for_large_rooms(driver: webdriver,wait_driver:WebDriverWait, start: int, end: int, day: str, room = None): 
+def reserve_time_range_for_large_rooms(driver: webdriver,wait_driver:WebDriverWait, start: int, end: int, day: str, interval: int, room = None): 
     if(start >= end):
         print("Error: Start >= End") 
         return False
     if(end > 24 and start < 1): 
         print("Error: Invalid time range")
         return False
-    for hour in range(start,end,2):
+    for hour in range(start,end,interval):
         meridian = "am" if hour//12 == 0 else "pm" 
         hour = ((hour-1)%12)+1
         time = TIME_FORMAT.format(hour=str(hour), min ="00", meridian=meridian)
@@ -169,7 +169,8 @@ def reserve_time_range_for_large_rooms(driver: webdriver,wait_driver:WebDriverWa
             reserveRoom(driver, wait_driver, day, time)
     return True 
 
-def reserve_day_range_and_time_range_for_large_rooms(driver: webdriver, wait_driver, start_day:int , end_day:int , start_time:int, end_time:int, room = None):
+
+def reserve_day_range_and_time_range_for_large_rooms(driver: webdriver, wait_driver, start_day:int , end_day:int , start_time:int, end_time:int, interval: int, room = None):
     if(start_day > end_day):
         print("ERROR: start_day > end_day")
         return False 
@@ -183,22 +184,23 @@ def reserve_day_range_and_time_range_for_large_rooms(driver: webdriver, wait_dri
         print("Error: Invalid time range")
         return False
     for day in range(start_day, end_day+1): 
-        reserve_time_range_for_large_rooms(driver, wait_driver, start_time,end_time, str(day), room)
+        reserve_time_range_for_large_rooms(driver, wait_driver, start_time,end_time, str(day), interval, room)
 if __name__ == "__main__":
-    day_start, day_end, time_start, time_end, room = None, None, None, None, None
+    day_start, day_end, time_start, time_end, interval, room = None, None, None, None, None, None 
     parser = argparse.ArgumentParser(description='NYU Libcal Library Room Reserver')
     parser.add_argument('--DTRange', help=
-        'The date and time range for reservation day-start,day-end,time-start,time-end,room (int,int,int,int,str(optional) ), time is in military time')
+        'The date and time range for reservation day-start,day-end,time-start,time-end,room (int,int,int,int, int, str(optional) ), time is in military time. Time interval is the interval in hours that libcal allows you to reserve (this is different dependent on types of room) ')
     parser.add_argument('--URL', help=
         'The URL of an NYU Libcal room reservation page, defaulted as Dibner Large Library rooms')
     cmdline = parser.parse_args()
     if cmdline.DTRange is not None: 
         parts = cmdline.DTRange.split(",")
-        if(len(parts) == 4):
-            [day_start, day_end, time_start, time_end] = [int(x) for x in parts]
-        elif(len(parts) == 5): 
-            [day_start, day_end, time_start, time_end] = [int(x) for x in parts[0:4]]
-            room = parts[4]
+        if(len(parts) == 5):
+            [day_start, day_end, time_start, time_end, interval] = [int(x) for x in parts]
+        elif(len(parts) == 6): 
+            [day_start, day_end, time_start, time_end, interval] = [int(x) for x in parts[0:5]]
+            room = parts[5]
+            
         else: 
             sys.exit("Invalid Amount of Date and Time Range arguments --help")
     else: 
@@ -215,7 +217,7 @@ if __name__ == "__main__":
     else:
         driver = webdriver.Chrome(executable_path=DRIVER_PATH)
     wait_driver = WebDriverWait(driver, WAIT_DELAY) 
-    reserve_day_range_and_time_range_for_large_rooms(driver,wait_driver,day_start,day_end, time_start,time_end, room)
+    reserve_day_range_and_time_range_for_large_rooms(driver,wait_driver,day_start,day_end, time_start,time_end, interval, room)
     driver.quit()
 
     

@@ -25,9 +25,9 @@ DRIVER_PATH=
 ## Command to run 
 ### tags
 DTRange
-- --DTRange day-start,day-end,time-start,time-end,room 
-- [int,int,int,int,str(optional)]
-- must be include 
+- --DTRange day-start,day-end,time-start,time-end,interval,room
+- [int,int,int,int,int,str(optional)]
+- for the interval you have to figure out the time intervals that libcal allows you to reserve by in hours, this changes based on the type of room you are trying to reserve
 - room is optional, but will specify what room you  want 
 
 URL
